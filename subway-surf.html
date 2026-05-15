@@ -13,6 +13,18 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="preload" as="image" href="media/perfil_typer.webp">
+  <link rel="preload" as="image" href="media/previas 01.jpeg" fetchpriority="high">
+  <link rel="preload" as="image" href="media/vendas%20online%20em%2024%20horas.jpg">
+  <link rel="preload" as="video" href="media/video_subway_sulf.mp4">
+
+  <!-- Microsoft Clarity -->
+  <script type="text/javascript">
+    (function (c, l, a, r, i, t, y) {
+      c[a] = c[a] || function () { (c[a].q = c[a].q || []).push(arguments) };
+      t = l.createElement(r); t.async = 1; t.src = "https://www.clarity.ms/tag/" + i;
+      y = l.getElementsByTagName(r)[0]; y.parentNode.insertBefore(t, y);
+    })(window, document, "clarity", "script", "wr9feam3gc");
+  </script>
 
   <style>
     :root {
@@ -176,7 +188,7 @@
       max-width: 83%;
       opacity: 0;
       transform: translateY(12px);
-      transition: all 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+      transition: all 0.2s cubic-bezier(0.1, 0.9, 0.2, 1);
     }
 
     .row.show {
@@ -482,7 +494,13 @@
     }
 
     function scroll() {
-      chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: isMobile ? 'auto' : 'smooth' 
+      });
+      // Fallback para garantir que desça tudo
+      setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 100);
     }
 
     async function showTyping(ms) {
@@ -520,6 +538,7 @@
           playsinline
           loop
           preload="auto"
+          style="width: 100%; height: auto; object-fit: cover; background: #000;"
         ></video>
         <div class="video-time">${getTime()}</div>
       `;
@@ -527,12 +546,24 @@
       row.appendChild(wrap);
       chat.insertBefore(row, typing);
 
+      const vid = wrap.querySelector('video');
+      vid.addEventListener('loadeddata', scroll);
+      vid.addEventListener('play', () => {
+        scroll();
+        setTimeout(scroll, 200);
+      });
+
       setTimeout(() => {
         row.classList.add('show');
         scroll();
         // Garante autoplay mesmo em browsers restritivos
-        const vid = wrap.querySelector('video');
-        vid.play().catch(() => { });
+        const playPromise = vid.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(error => {
+            console.log("Autoplay prevented or video error:", error);
+            vid.controls = true;
+          });
+        }
       }, 40);
     }
 
@@ -553,8 +584,14 @@
 
       setTimeout(() => {
         row.classList.add('show');
-        // pequeno delay extra pra transição ser vista
-        setTimeout(() => { wrap.classList.add('reveal'); scroll(); }, 80);
+        const img = wrap.querySelector('img');
+        if (img.complete) {
+            wrap.classList.add('reveal');
+            scroll();
+        } else {
+            img.onload = () => { wrap.classList.add('reveal'); scroll(); };
+        }
+        setTimeout(scroll, 100);
       }, 40);
     }
 
@@ -575,7 +612,14 @@
 
       setTimeout(() => {
         row.classList.add('show');
-        setTimeout(() => { wrap.classList.add('reveal'); scroll(); }, 100);
+        const img = wrap.querySelector('img');
+        if (img.complete) {
+            wrap.classList.add('reveal');
+            scroll();
+        } else {
+            img.onload = () => { wrap.classList.add('reveal'); scroll(); };
+        }
+        setTimeout(scroll, 300);
       }, 40);
     }
 
@@ -614,16 +658,16 @@
     async function run() {
 
       /* ── ABERTURA — Sofia se apresenta ── */
-      await wait(500);
-      await showTyping(700);
+      await wait(300);
+      await showTyping(500);
       addMsg("oi!! tudo bem? 🥰");
 
-      await wait(1400);
-      await showTyping(900);
+      await wait(800);
+      await showTyping(600);
       addMsg("me chamo Sofia, tenho 23 anos...");
 
       /* ── Foto de apresentação ── */
-      await wait(1000);
+      await wait(500);
       addIntroPhoto("media/previas 01.jpeg");
 
       await wait(1800);
@@ -643,12 +687,12 @@
 
     /* ══════════ PERGUNTA 1 — Subway Surf + Vídeo ══════════ */
     async function pergunta1() {
-      await wait(700);
-      await showTyping(1000);
+      await wait(400);
+      await showTyping(700);
       addMsg("você já jogou Subway Surf? 🚇");
 
       /* Vídeo aparece logo depois da pergunta, automático */
-      await wait(800);
+      await wait(400);
       addVideo("media/video_subway_sulf.mp4");
 
       await wait(1200);
